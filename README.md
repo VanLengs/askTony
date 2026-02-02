@@ -53,7 +53,6 @@ flowchart TD
     style Silver fill:#c0c0c0,stroke:#333,color:black
     style Gold fill:#ffd700,stroke:#333,color:black
 ```
-![AskTony 数据流转图](imgs/workflow.png)
 
 ## 2) 环境准备与安装
 
@@ -159,7 +158,7 @@ asktony import-dim-info --member-file dim_member_filled.csv --repo-file dim_repo
 --top 300：表示只取前 300 条记录，默认 top
 --all：表示取所有，建议导出 csv 时，要加上 --all
 
-评分/反刷规则说明文档见：`docs/scoring.md`
+员工个人及直线上级评分/反刷分规则详细介绍 - [打分/反刷规则文档](docs/scoring.md) 
 
 ```bash
 asktony analyze active-repos --months 3 [--top 200/--all]
