@@ -220,6 +220,27 @@ def suspicious_committers(
     console.print(wh.suspicious_committers(months=months, top=top_n))
 
 
+@analyze_app.command("external-committers")
+def external_committers(
+    months: int = typer.Option(2, min=1, max=60, help="最近 N 个月"),
+    top: int = typer.Option(200, min=1, max=200000, help="返回 Top N（按 commit_count 倒序）"),
+    all: bool = typer.Option(False, "--all", help="返回全量（不做 Top 限制）"),
+    csv_path: Path | None = typer.Option(None, "--csv", help="输出到 CSV 文件"),
+) -> None:
+    """
+    导出窗口期内“有提交但无法通过 email 映射到 employee_id”的作者列表（外部提交者）。
+    """
+    cfg = load_config()
+    wh = Warehouse.from_config(cfg)
+    top_n = None if all else top
+    columns, rows = wh.external_committers_data(months=months, top=top_n)
+    if csv_path is not None:
+        _write_csv(csv_path, columns, rows)
+        console.print({"csv": str(csv_path), "rows": len(rows)})
+        return
+    console.print(wh.external_committers(months=months, top=top_n or 200000))
+
+
 @analyze_app.command("debug-active-repos")
 def debug_active_repos(
     months: int = typer.Option(2, min=1, max=60, help="最近 N 个月"),

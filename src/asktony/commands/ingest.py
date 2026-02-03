@@ -517,6 +517,7 @@ def rebuild_silver_commits(
     from asktony.lake import _json_dumps as _json_dumps  # noqa: PLC0415
     from asktony.lake import extract_committed_at_str as _extract_committed_at_str  # noqa: PLC0415
     from asktony.lake import extract_author_identity as _extract_author_identity  # noqa: PLC0415
+    from asktony.lake import _company_username_from_email as _company_username_from_email  # noqa: PLC0415
 
     def commit_rows(repo_id: str, items: list[dict], ingested_at: dt.datetime) -> list[tuple]:
         rows: list[tuple] = []
@@ -527,6 +528,9 @@ def rebuild_silver_commits(
             author_id, author_username, author_email = _extract_author_identity(it)
             if not author_username and isinstance(it.get("authorName"), str):
                 author_username = str(it.get("authorName"))
+            company_user = _company_username_from_email(author_email)
+            if company_user:
+                author_username = company_user
             committed_at_str = _extract_committed_at_str(it)
             stats = it.get("stats") if isinstance(it.get("stats"), dict) else {}
             additions = int(stats.get("additions") or it.get("additions") or 0)

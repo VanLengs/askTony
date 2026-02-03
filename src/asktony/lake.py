@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -154,6 +155,20 @@ def extract_member_identity(member_obj: dict[str, Any]) -> tuple[str, str, str]:
             email = v
     return user_id, username, email
 
+
+def _company_username_from_email(email: str) -> str | None:
+    e = (email or "").strip().lower()
+    if not e:
+        return None
+    # Corporate email policy:
+    # - Regular employee: aa.bb@clife.cn
+    # - Contractor: 801495@clife.cn (numeric local-part)
+    if not re.fullmatch(r"(?:[a-z0-9]+\.[a-z0-9]+|[0-9]+)@clife\.cn", e):
+        return None
+    local = e.split("@", 1)[0]
+    if re.fullmatch(r"[0-9]+", local):
+        return f"partner-{local}"
+    return local
 def _parse_iso_dt(value: str) -> dt.datetime | None:
     return _parse_datetime_loose(value)
 
@@ -446,6 +461,9 @@ class Lake:
             author_id, author_username, author_email = extract_author_identity(it)
             if not author_username and isinstance(it.get("authorName"), str):
                 author_username = str(it.get("authorName"))
+            company_user = _company_username_from_email(author_email)
+            if company_user:
+                author_username = company_user
 
             committed_at_str = extract_committed_at_str(it)
 
@@ -499,6 +517,9 @@ class Lake:
             author_id, author_username, author_email = extract_author_identity(it)
             if not author_username and isinstance(it.get("authorName"), str):
                 author_username = str(it.get("authorName"))
+            company_user = _company_username_from_email(author_email)
+            if company_user:
+                author_username = company_user
             committed_at_str = extract_committed_at_str(it)
             stats = it.get("stats") if isinstance(it.get("stats"), dict) else {}
             additions = int(stats.get("additions") or it.get("additions") or 0)

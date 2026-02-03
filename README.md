@@ -141,10 +141,18 @@ asktony export-repo-template --output dim_repo_template.csv
 - 成员：`full_name`、`department_level2_name`、`department_level3_name`、`role`
 - 仓库：`department_level2_name`、`department_level3_name`
 
+说明（避免填写困惑）：
+- `member_key` 是系统生成的成员主键：在公司邮箱策略 `*@clife.cn` 生效后（正式员工形如 `aa.bb@clife.cn`，外包员工形如 `801495@clife.cn`），系统会优先用邮箱 local-part 作为 `member_key/username`：正式员工为 `aa.bb`，外包员工为 `partner-801495`；无法归并到公司员工时（外部提交）则使用该次提交携带的 `author_email` 作为 `member_key`（若 email 为空再兜底旧规则）。采集表里**不需要填写** `member_key`（模板已不再导出该列）。
+- `one_id` 是 one-id 方案下的统一身份键：对“员工口径”分析，系统会优先使用 `employee_id` 作为 one-id（即每个员工的唯一 person_id），从而把同一员工可能出现的多个 `member_key/username/email/user_id` 归并到同一 `employee_id`。
+- `dim_member_filled.csv` 建议以 HR 口径填写：`employee_id`（必填）+ `full_name/部门/role` + `email`；系统会自动匹配/生成内部 `member_key` 并建立“提交身份 → employee_id”的映射。
+- 如果同一员工历史上出现过多个邮箱（换邮箱、历史提交用私人邮箱等），可在 `dim_member_filled.csv` 里填写 `email_aliases`（用 `;` 或 `,` 或 `|` 分隔多个值）。系统会把这些 alias 映射到该行的 `employee_id`，用于把 commits 统一归并到同一员工。
+- Commit 归并口径：在 CNB 强制提交必须带 `author_email` 后，系统默认以 `author_email` 作为 commit 侧归并主键（`gold.fact_commit_employee` 仅使用 email 进行员工映射）。
+- 若 `username/email` 匹配到多个成员（或 email/username 指向不同 member_key），导入会报错提示需要人工确认。
+
 导入前先做数据质量校验（不写入）：
 
 ```bash
-asktony import-dim-info --member-file dim_member_filled.csv --repo-file dim_repo_filled.csv --dry-run
+asktony import-dim-info --member-file tos/dim_member_filled.csv --repo-file tos/dim_repo_filled.csv --dry-run
 ```
 
 通过后再写入：
@@ -165,6 +173,7 @@ asktony analyze active-repos --months 3 [--top 200/--all]
 asktony analyze member-commits --months 3 [--top 200/--all]
 asktony analyze active-members --months 2 [--top 2000/--all] [--all-fields]
 asktony analyze inactive-members --months 2 [--top 2000/--all] [--all-fields]
+asktony analyze external-committers --months 2 [--top 200/--all]
 asktony analyze missing-fullname-authors --months 2 [--top 200/--all]
 asktony analyze line-manager-dev-activity --months 2 [--top 200/--all]
 asktony analyze project-activity --months 2 [--top 200/--all]
@@ -183,6 +192,7 @@ asktony analyze active-members --months 2 --all --csv output/active_members.csv
 asktony analyze inactive-members --months 2 --all --csv output/inactive_members.csv
 asktony analyze active-members --months 2 --all --all-fields --csv output/active_members_all_fields.csv
 asktony analyze inactive-members --months 2 --all --all-fields --csv output/inactive_members_all_fields.csv
+asktony analyze external-committers --months 2 --all --csv output/external_committers.csv
 asktony analyze missing-fullname-authors --months 2 --all --csv output/missing_fullname_authors.csv
 asktony analyze line-manager-dev-activity --months 2 --all --csv output/line_manager_dev_activity.csv
 asktony analyze suspicious-committers --months 2 --all --csv output/suspicious_committers.csv
