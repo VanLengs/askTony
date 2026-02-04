@@ -567,7 +567,10 @@ class Lake:
             before = conn.execute("SELECT COUNT(*) FROM silver.commits WHERE repo_id = ?", [str(repo)]).fetchone()[0]
             conn.execute(
                 """
-                INSERT INTO silver.commits
+                INSERT INTO silver.commits(
+                  repo_id, sha, author_id, author_username, author_email,
+                  committed_at, additions, deletions, raw, ingested_at
+                )
                 SELECT
                   n.repo_id,
                   n.sha,
