@@ -120,8 +120,14 @@ def export(
     columns, rows = wh.member_commits_all_repos_data(months=months, top=None)
     add_table_sheet("member-commits", columns, rows)
 
+    columns, rows = wh.employee_commits_all_repos_data(months=months, top=None)
+    add_table_sheet("employee-commits", columns, rows)
+
     columns, rows = wh.repo_member_commits_data(months=months, top=None)
     add_table_sheet("repo-member-commits", columns, rows)
+
+    columns, rows = wh.repo_employee_commits_data(months=months, top=None)
+    add_table_sheet("repo-employee-commits", columns, rows)
 
     columns, rows = wh.active_members_data(months=months, top=None, all_fields=True)
     add_table_sheet("active-members", columns, rows)
