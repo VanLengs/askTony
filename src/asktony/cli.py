@@ -5,6 +5,7 @@ from rich.console import Console
 
 from asktony.commands.analyze import analyze_app
 from asktony.commands.config import config_app
+from asktony.commands.critic import critic_app
 from asktony.commands.ingest import ingest_app
 from asktony.commands.model import model_app
 from asktony.commands.visualize import visualize_app
@@ -27,6 +28,7 @@ app.add_typer(model_app, name="model")
 app.add_typer(analyze_app, name="analyze")
 app.add_typer(visualize_app, name="visualize")
 app.add_typer(universe_app, name="universe")
+app.add_typer(critic_app, name="critic")
 
 console = Console()
 

@@ -180,6 +180,18 @@ asktony analyze project-activity --months 2 [--top 200/--all]
 asktony analyze suspicious-committers --months 2 [--top 200/--all]
 asktony analyze active-employee-score --months 2 [--top 200/--all]
 
+## 7.1) 月度绩效 critic
+
+对 line manager 的月度绩效等级表做 critic（输入 XLSX，含“正式员工”“外包”两个 sheet；输出会额外生成一个“异常”sheet 标明原因）：
+
+```bash
+asktony critic monthly-assessment --input /path/to/monthly_performance.xlsx --output output/monthly_assessment_critic.xlsx --months 2
+```
+
+规则补充：
+- 若员工未命中 `active-employee-score`，但出现在 `inactive-members` 且角色包含“开发”，则会按更低的参考期望（≈D）进行 critic（不活跃开发应劣于活跃但低分员工）。
+- 可选 `--slim` 精简导出字段（对所有 sheet 生效）。
+
 asktony visualize line-manager-dev-activity --months 2 [--top-n 12] [--bottom-n 6] [--input output/line_manager_dev_activity.csv]
 asktony visualize active-employee-score --months 2 [--top-n 10] [--bottom-n 10] [--input output/active_employee_score.csv]
 asktony visualize anti-fraud-report --months 2 [--top-n 10]
